@@ -2,7 +2,7 @@
     EECS 738
     Project 1: Probably Interesting Data
     File: GMM.py
-    Implementation of Guassian Mixture Model
+    Implementation of Gaussian Mixture Model
     Followed tutorials provided by python-course.eu: Gaussian Mixture Model
 '''
 import numpy as np
@@ -32,19 +32,26 @@ class GMM:
         self.covariance = np.zeros((self.n_sources,len(A[0]),len(A[0])))
         for dim in range(len(self.covariance)):
             np.fill_diagonal(self.covariance[dim],5)
-
         self.pi = np.ones(self.n_sources)/self.n_sources
 
+        # set initial likelihood array
         likelihoods = []
 
+        # plot initial setup with random clusters
         self.plot_initial()
 
+        # run improvement algorithm for a set number of iterations
         for i in range(self.iterations):
+            # this is the "E-Step" of the algorithm where the actual math happens
+            # you can check out the equations used on the tutorial site
             r_ic = np.zeros((len(self.A), len(self.covariance)))
             for m, co, p, r in zip(self.mu,self.covariance,self.pi, range(len(r_ic[0]))):
                 co += self.reg_cov
                 mn = multivariate_normal(mean = m, cov = co)
                 r_ic[:,r] = p*mn.pdf(self.A)/np.sum([pi_c*multivariate_normal(mean=mu_c,cov=cov_c).pdf(A) for pi_c,mu_c,cov_c in zip(self.pi,self.mu,self.covariance+self.reg_cov)],axis=0)
+
+            # "M-Step" where the mean vectors are calculated, along with the new covariance matricies
+            # it looks at each point and determines these things based on the probability that a given point is a member of a specific class
             self.mu = []
             self.covariance = []
             self.pi = []
