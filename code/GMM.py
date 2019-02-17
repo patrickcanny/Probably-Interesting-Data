@@ -12,6 +12,10 @@ style.use('fivethirtyeight')
 from sklearn.datasets.samples_generator import make_blobs
 from scipy.stats import multivariate_normal
 
+X,Y = make_blobs(cluster_std=1.5,random_state=20,n_samples=500,centers=5)
+# Stratch dataset to get ellipsoid data
+X = np.dot(X,np.random.RandomState(0).randn(2,2))
+
 class GMM:
     def __init__(self, A, n_sources, iterations):
         self.iterations = iterations
@@ -29,7 +33,7 @@ class GMM:
 
         # set initial mu, covariance, and pi
         self.mu = np.random.randint(min(self.A[:,0]),max(self.A[:,0]),size=(self.n_sources,len(self.A[0])))
-        self.covariance = np.zeros((self.n_sources,len(A[0]),len(A[0])))
+        self.covariance = np.zeros((self.n_sources,len(self.A[0]),len(self.A[0])))
         for dim in range(len(self.covariance)):
             np.fill_diagonal(self.covariance[dim],5)
         self.pi = np.ones(self.n_sources)/self.n_sources
@@ -48,7 +52,8 @@ class GMM:
             for m, co, p, r in zip(self.mu,self.covariance,self.pi, range(len(r_ic[0]))):
                 co += self.reg_cov
                 mn = multivariate_normal(mean = m, cov = co)
-                r_ic[:,r] = p*mn.pdf(self.A)/np.sum([pi_c*multivariate_normal(mean=mu_c,cov=cov_c).pdf(A) for pi_c,mu_c,cov_c in zip(self.pi,self.mu,self.covariance+self.reg_cov)],axis=0)
+                r_ic[:,r] = p*mn.pdf(self.A)/np.sum([pi_c*multivariate_normal(mean=mu_c,cov=cov_c).pdf(self.A)
+                    for pi_c,mu_c,cov_c in zip(self.pi,self.mu,self.covariance+self.reg_cov)],axis=0)
 
             # "M-Step" where the mean vectors are calculated, along with the new covariance matricies
             # it looks at each point and determines these things based on the probability that a given point is a member of a specific class
@@ -63,7 +68,7 @@ class GMM:
                 self.pi.append(m_c/np.sum(r_ic))
 
 
-            likelihoods.append(np.log(np.sum([k*multivariate_normal(self.mu[i],self.covariance[j]).pdf(A) for k,i,j in zip(self.pi,range(len(self.mu)),range(len(self.covariance)))])))
+            likelihoods.append(np.log(np.sum([k*multivariate_normal(self.mu[i],self.covariance[j]).pdf(self.A) for k,i,j in zip(self.pi,range(len(self.mu)),range(len(self.covariance)))])))
 
         self.plot_likelihoods(likelihoods)
 
@@ -103,3 +108,6 @@ class GMM:
         ax1.set_title('Log-Likelihood')
         ax1.plot(range(0,self.iterations,1),likelihoods)
 
+GMM = GMM(X,5,50)
+GMM.fit()
+GMM.predict([[0.5,0.5]])
