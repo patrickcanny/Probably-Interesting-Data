@@ -11,6 +11,7 @@ For the Red Wine Dataset, we formulated the following ideas:
 - Categorize Wines
   - K-Means Clustering
   - Gaussian Mixture Models
+
 For the Mushroom Dataset, we formulated the following ideas: 
 - Predict if a mushroom is poisonous
   - K-Means K = 2
