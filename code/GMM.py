@@ -12,9 +12,9 @@ style.use('fivethirtyeight')
 from sklearn.datasets.samples_generator import make_blobs
 from scipy.stats import multivariate_normal
 
-X,Y = make_blobs(cluster_std=1.5,random_state=20,n_samples=500,centers=5)
+#X,Y = make_blobs(cluster_std=1.5,random_state=20,n_samples=500,centers=5)
 # Stratch dataset to get ellipsoid data
-X = np.dot(X,np.random.RandomState(0).randn(2,2))
+#X = np.dot(X,np.random.RandomState(0).randn(2,2))
 
 class GMM:
     def __init__(self, A, n_sources, iterations):
@@ -30,7 +30,6 @@ class GMM:
         self.reg_cov = 1e-6*np.identity(len(self.A[0]))
         x,y = np.meshgrid(np.sort(self.A[:,0]), np.sort(self.A[:,1]))
         self.xy = np.array([x.flatten(), y.flatten()]).T
-
         # set initial mu, covariance, and pi
         self.mu = np.random.randint(min(self.A[:,0]),max(self.A[:,0]),size=(self.n_sources,len(self.A[0])))
         self.covariance = np.zeros((self.n_sources,len(self.A[0]),len(self.A[0])))
@@ -67,10 +66,22 @@ class GMM:
                 self.covariance.append(((1/m_c)*np.dot((np.array(r_ic[:,c]).reshape(len(self.A),1)*(self.A-mu_c)).T,(self.A-mu_c)))+self.reg_cov)
                 self.pi.append(m_c/np.sum(r_ic))
 
+            sumlist = [k*multivariate_normal(self.mu[i],self.covariance[j]).pdf(self.A) for k,i,j in zip(self.pi,range(len(self.mu)),range(len(self.covariance)))]
+            summed = np.sum(sumlist)
+            likelihoods.append(np.log(summed))
+        self.plot_final()
 
-            likelihoods.append(np.log(np.sum([k*multivariate_normal(self.mu[i],self.covariance[j]).pdf(self.A) for k,i,j in zip(self.pi,range(len(self.mu)),range(len(self.covariance)))])))
+    def plot_final(self):
+        fig3 = plt.figure(figsize=(10,10))
+        ax2 = fig3.add_subplot(111)
+        ax2.scatter(self.A[:,0],self.A[:,1])
 
-        self.plot_likelihoods(likelihoods)
+        for m,c in zip(self.mu,self.covariance):
+            multi_normal = multivariate_normal(mean=m, cov=c)
+            ax2.contour(np.sort(self.A[:,0]),np.sort(self.A[:,1]),multi_normal.pdf(self.xy).reshape(len(self.A),len(self.A)),colors='black',alpha=0.3)
+            ax2.scatter(m[0],m[1],c='grey',zorder=10,s=100)
+            ax2.set_title('Final state')
+        plt.show()
 
     def predict(self, B):
         fig3 = plt.figure(figsize=(10,10))
@@ -108,6 +119,6 @@ class GMM:
         ax1.set_title('Log-Likelihood')
         ax1.plot(range(0,self.iterations,1),likelihoods)
 
-GMM = GMM(X,5,50)
-GMM.fit()
-GMM.predict([[0.5,0.5]])
+#GMM = GMM(X,5,50)
+#GMM.fit()
+#GMM.predict([[0.5,0.5]])
