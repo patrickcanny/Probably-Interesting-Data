@@ -40,6 +40,7 @@ continuous.
 
 We finally settled on the ***Iris dataset and the Mushroom dataset***. Please view those notebooks for our implementation.
 
-Finally, we implemented a scikit learn library in order to test different covariances' accuracy versus our algorithm's accuracy. See the gmm_covariances.ipynb 
-in our [notebooks](/notebooks/) folder for the results.
+Finally, we implemented a scikit learn library in order to test different covariances' accuracy versus our algorithm's accuracy. We compared the accuracy
+of the scikit learn GMM with our GMM visually. With the accuracy precentage, we could look at our visualizations and see how close we were to their implementation.
+See the gmm_covariances.ipynb in our [notebooks](/notebooks/) folder for the results.
 
